@@ -1,0 +1,17 @@
+{
+    "name": "empulse/state-machine",
+    "require-dev": {
+        "phpunit/phpunit": "^11.3"
+    },
+    "autoload": {
+        "psr-4": {
+            "Empulse\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Empulse\\Tests\\": "tests/"
+        }
+    },
+    "require": {}
+}
