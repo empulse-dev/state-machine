@@ -39,5 +39,18 @@ $mapConfig = [
                 ]
             ],
         ],
+        'delivery' => [
+            Map::MAP_FROM => [
+                'processing',
+            ],
+            Map::MAP_TO => 'delivered',
+            Map::PROPERTIES => [
+                'group' => null,
+                'sortable_by_group' => null,
+            ],
+            Map::VALIDATORS => [
+                AlwaysMoveValidator::class,
+            ],
+        ]
     ]
 ];

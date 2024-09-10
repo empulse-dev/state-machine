@@ -2,6 +2,7 @@
 
 namespace Empulse\State;
 
+use Empulse\Exception\Map\LoopDetectedException;
 use Empulse\Exception\MapException;
 use Empulse\State\Machine\Item;
 
@@ -28,6 +29,8 @@ class Machine {
      */
     protected $transitions = [];
 
+    protected $appliedTransitions = [];
+
     protected $code;
 
     public function getCode(){
@@ -52,6 +55,7 @@ class Machine {
         $this->item = $item;
         $this->transitions = $map[Map::MAP_TRANSITIONS];
         $this->states = $map[Map::MAP_STATES];
+        $this->appliedTransitions = [];
 
         //@todo validate item has interface implemented
         $initialState = $this->item->getItemState();
@@ -92,11 +96,16 @@ class Machine {
             foreach ($transitions as $transitionCode => $transition) {
                 if ($this->_can($transition, $parameters)) {
                     $this->_apply($transition[Map::MAP_TO], $parameters);
-                    $properties = $transition['properties'] ?? [];
 
-                    if (!isset($properties['stop_after_apply'])
-                        //&& !isset($properties[Transition::TRANSITION_TYPE_COMPLEMENT])
-                    ) {
+                    $continue = true;
+
+                    if(isset($transition[Map::PROPERTIES])){
+                        if(in_array(Map::STOP_AFTER_APPLY, $transition[Map::PROPERTIES])){
+                            $continue = false;
+                        }    
+                    }
+                    
+                    if ($continue) {
                         $this->movemovemove();
                     }
 
@@ -154,7 +163,16 @@ class Machine {
         return (Map::VALID_ALL === $type);
     }
 
-    protected function _apply($transitionTo, $parameters = null){
+    protected function _apply($transitionTo, $parameters = null): void{
         $this->item->setItemState($transitionTo);
+        if(!isset($this->appliedTransitions[$transitionTo])){
+            $this->appliedTransitions[$transitionTo] = 1;
+        } else {
+            $this->appliedTransitions[$transitionTo]+= 1;
+            
+            if($this->appliedTransitions[$transitionTo] > 1){
+                throw new LoopDetectedException;
+            }    
+        }
     }
 }

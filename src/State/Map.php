@@ -25,6 +25,8 @@ class Map
 
     const PROPERTIES = 'properties';
 
+    const STOP_AFTER_APPLY = 'stop_after_apply';
+
     const DENIAL_CHAR = '!';
     protected $_map = [];
 
