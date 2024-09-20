@@ -3,6 +3,8 @@
     "require-dev": {
         "phpunit/phpunit": "^11.3"
     },
+    "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "Empulse\\": "src/"
@@ -13,5 +15,8 @@
             "Empulse\\Tests\\": "tests/"
         }
     },
-    "require": {}
+    "minimum-stability": "dev",
+    "require": {
+        "php": ">=8.3"
+    }
 }
