@@ -32,6 +32,6 @@ abstract class AbstractValidator
     protected function _saveHistory($orderItem, $history)
     {
         //$asset = $object->getAssetValidator()->saveAsset(ShipConfirmType::class);
-        //$history->setFkGaiaTransitionAssetShipConfirm($asset);
+        //$history->setFkTransitionAssetShipConfirm($asset);
     }
 }

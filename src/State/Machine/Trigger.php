@@ -189,7 +189,7 @@ class Trigger {
                 // } catch (\Exception $e) {
                     // $this->workflowLogger->error(sprintf(
                     //     '[PushException] Flux: %s, POI: %s, User: %s, Message: %s, File: %s, Line: %s', get_class($workflow),
-                    //     $workflow->getObject()->getGaiaPurchaseOrderItemId(),
+                    //     $workflow->getObject()->getPurchaseOrderItemId(),
                     //     $this->getLoggedUser(),
                     //     $e->getMessage(),
                     //     $e->getFile(),
