@@ -6,44 +6,52 @@ namespace Empulse\State\Machine;
  * Item
  *
  */
-class Item
+trait Item
 {
 
-    CONST STATE_FIELD = 'emp_state';
+    public $state = null;
 
     protected $_data = [];
 
-    public function __construct($data){
+    /**
+     * Summary of setData
+     * 
+     * @param mixed $data
+     * @return mixed
+     */
+    public function setData($data): self{
         $this->_data = $data;
+
+        return $this;
     }
 
     /**
      * get current state
      * 
-     * @return string|null
+     * @return mixed
      */
-    public function getItemState(): string|null{
-        if(!isset($this->_data[self::STATE_FIELD])){
-            return null;
-        }
-        
-        return $this->_data[self::STATE_FIELD];
+    public function getState(): mixed{
+        return $this->state;
     }
 
     /**
-     * Set the state of the entity
-     *
-     * @param string $value
-     *
-     * @throws \Exception
+     * set current state
+     * 
+     * @return int|null
      */
-    public function setItemState(string $state): self{
-        $this->_data[self::STATE_FIELD] = $state;
+    public function setState($state): self{
+        $this->state = $state;
 
         return $this;
     }
 
-    public function __get($attr)
+    /**
+     * getter magic method
+     * 
+     * @param mixed $attr
+     * @return mixed
+     */
+    public function __get($attr):mixed
     {
         if (array_key_exists($attr, $this->_data)) {
             return $this->_data[$attr];

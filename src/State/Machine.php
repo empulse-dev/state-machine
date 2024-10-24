@@ -5,6 +5,7 @@ namespace Empulse\State;
 use Empulse\Exception\Map\LoopDetectedException;
 use Empulse\Exception\MapException;
 use Empulse\State\Machine\Item;
+use Empulse\State\Machine\ItemInterface;
 
 class Machine {
 
@@ -50,7 +51,7 @@ class Machine {
     /**
      * {@inheritdoc}
      */
-    public function initialize(Item $item, array $map)
+    public function initialize(ItemInterface $item, array $map):self
     {
         $this->item = $item;
         $this->transitions = $map[Map::MAP_TRANSITIONS];
@@ -58,15 +59,15 @@ class Machine {
         $this->appliedTransitions = [];
 
         //@todo validate item has interface implemented
-        $initialState = $this->item->getItemState();
+        $initialState = $this->item->getState();
         
 
         if (null === $initialState) {
             $initialState = $this->findInitialState();
-            $this->item->setItemState($initialState);
-            // @todo set dispatcher
-            // $this->dispatcher->dispatch(FiniteEvents::SET_INITIAL_STATE, new StateMachineEvent($this));
+            $this->item->setState($initialState);
         }
+
+        return $this;
     }
 
     public function findInitialState(){
@@ -89,7 +90,7 @@ class Machine {
 
     protected function movemovemove(){
         // Validate if has current state
-        if ($this->item->getItemState()) {
+        if ($this->item->getState()) {
             $transitions = $this->transitions;
             //$parameters = $this->getParametersForCurrentTransition();
             $parameters = [];
@@ -118,7 +119,7 @@ class Machine {
     }
 
     protected function _can($transition, $parameters){
-        if(in_array($this->item->getItemState(), $transition[Map::MAP_FROM])){
+        if(in_array($this->item->getState(), $transition[Map::MAP_FROM])){
             if (!isset($transition[Map::VALIDATORS]) || empty($transition[Map::VALIDATORS])) {
                 throw new MapException('Every transition needs at least one validator');
             }
@@ -164,7 +165,7 @@ class Machine {
     }
 
     protected function _apply($transitionTo, $parameters = null): void{
-        $this->item->setItemState($transitionTo);
+        $this->item->setState($transitionTo);
         if(!isset($this->appliedTransitions[$transitionTo])){
             $this->appliedTransitions[$transitionTo] = 1;
         } else {

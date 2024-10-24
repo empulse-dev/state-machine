@@ -160,56 +160,21 @@ class Trigger {
      */
     protected function pushWorkflowItems($items, $fluxCode)
     {
-        try {
-            $items = is_callable($items) ? $items() : $items;
+        $items = is_callable($items) ? $items() : $items;
 
-            // $pushEvent = new PushEvent($items, $flux, $this);
-            // $this->beforePush($pushEvent);
+        // $pushEvent = new PushEvent($items, $flux, $this);
+        // $this->beforePush($pushEvent);
 
-            $stateMachine = new Machine();
-            
-            foreach ($items as $item) {
-                if (!in_array($item, $this->items, true)) {
-                    $this->items[] = $item;
-                }
-
-                $stateMachine->initialize($item, $this->flux[$fluxCode]);
-                
-                // $workflow = $this->prepare($flux, $item);
-                // $pushItemEvent = new PushItemEvent($item, $workflow);
-                // $this->beforePushItem($pushItemEvent);
-                // $workflow->setObject($item);
-                
-                $stateMachine->push();
-
-                // try {
-                    
-                // } catch (WorkflowPushException $e) {
-                //     throw $e;
-                // } catch (\Exception $e) {
-                    // $this->workflowLogger->error(sprintf(
-                    //     '[PushException] Flux: %s, POI: %s, User: %s, Message: %s, File: %s, Line: %s', get_class($workflow),
-                    //     $workflow->getObject()->getPurchaseOrderItemId(),
-                    //     $this->getLoggedUser(),
-                    //     $e->getMessage(),
-                    //     $e->getFile(),
-                    //     $e->getLine()
-                    // ));
-                // }
-
-                // $this->afterPushItem($pushItemEvent);
-
+        $stateMachine = new Machine();
+        
+        foreach ($items as $item) {
+            if (!in_array($item, $this->items, true)) {
+                $this->items[] = $item;
             }
-            // $this->afterPush($pushEvent);
-            // if (!$this->dryRun) {
 
-            // }
-        } catch (WorkflowPushException $e) {
-            
-            throw $e;
-        } catch (\Exception $e) {
-            
-            throw $e;
+            $stateMachine
+                ->initialize($item, $this->flux[$fluxCode])
+                ->push();
         }
 
         return $items;

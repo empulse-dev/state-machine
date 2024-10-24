@@ -2,9 +2,14 @@
 
 use Empulse\Exception\Map\LoopDetectedException;
 use Empulse\Exception\MapException;
-use Empulse\State\Machine\Item;
+use Empulse\State\Machine\ItemInterface;
 use Empulse\State\Machine\Trigger;
 use PHPUnit\Framework\TestCase;
+
+class Item implements ItemInterface{
+    use \Empulse\State\Machine\Item;
+    
+}
 
 final class TriggerTest extends TestCase
 {
@@ -13,7 +18,7 @@ final class TriggerTest extends TestCase
         $mapConfig = [];
         $this->expectException(MapException::class);
 
-        $poi = new Item([]);
+        $poi = new Item;
 
         $trigger = new Trigger;
         $trigger->addNewQueueItem(
@@ -25,7 +30,7 @@ final class TriggerTest extends TestCase
     {
         require dirname(__FILE__).'/Map/ProcessingMap.php';
 
-        $poi = new Item([]);
+        $poi = new Item;
 
         $trigger = new Trigger;
         $trigger->addNewQueueItem(
@@ -39,24 +44,24 @@ final class TriggerTest extends TestCase
     {
         require dirname(__FILE__).'/Map/ProcessingMap.php';
 
-        $item = new Item([]);
+        $item = new Item;
 
         $trigger = new Trigger;
         $trigger->push([$item], $mapConfig);
 
-        $this->assertEquals('processing', $item->getItemState());
+        $this->assertEquals('processing', $item->getState());
     }
 
     public function testToFinalState(): void
     {
         require dirname(__FILE__).'/Map/DeliveredMap.php';
 
-        $item = new Item([]);
+        $item = new Item;
 
         $trigger = new Trigger;
         $trigger->push([$item], $mapConfig);
 
-        $this->assertEquals('delivered', $item->getItemState());
+        $this->assertEquals('delivered', $item->getState());
     }
 
     public function testInfiniteLoopTransition(): void
@@ -66,7 +71,7 @@ final class TriggerTest extends TestCase
 
         require dirname(__FILE__).'/Map/LoopMap.php';
 
-        $item = new Item([]);
+        $item = new Item;
 
         $trigger = new Trigger;
         $trigger->push([$item], $mapConfig);
@@ -77,11 +82,11 @@ final class TriggerTest extends TestCase
 
         require dirname(__FILE__).'/Map/StopAfterApplyMap.php';
 
-        $item = new Item([]);
+        $item = new Item;
 
         $trigger = new Trigger;
         $trigger->push([$item], $mapConfig);
 
-        $this->assertEquals('processing', $item->getItemState());
+        $this->assertEquals('processing', $item->getState());
     }
 }
