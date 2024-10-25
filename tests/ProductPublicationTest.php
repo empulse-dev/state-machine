@@ -6,7 +6,7 @@ use Empulse\State\Machine\ItemInterface;
 use Empulse\State\Machine\Trigger;
 use PHPUnit\Framework\TestCase;
 
-class Item implements ItemInterface{
+class Product implements ItemInterface{
     use \Empulse\State\Machine\Item;
     
     public static function getBitMap():array{
@@ -23,7 +23,7 @@ final class ProductPublicationTest extends TestCase
     {
         require dirname(__FILE__).'/Map/ProductMap.php';
 
-        $item = new Item;
+        $item = new Product;
 
         $item->setData([
             'name' => 'Producto',
@@ -65,5 +65,43 @@ final class ProductPublicationTest extends TestCase
 
         $trigger->push([$item], $mapConfig);
         $this->assertEquals('publish', $item->getState());
+    }
+
+    public function testDirectToPublishProductScenario(): void
+    {
+        require dirname(__FILE__).'/Map/ProductMap.php';
+
+        $item = new Product;
+
+        $item->setData([
+            'name' => 'Producto',
+            'price' => 12.34,
+            'image' => 'some/url.jpg'
+        ]);
+
+        $item->setFlag('active');
+
+        $trigger = new Trigger;
+        
+        $trigger->push([$item], $mapConfig);
+        $this->assertEquals('publish', $item->getState());
+    }
+
+    public function testStayOnCreatedProductScenario(): void
+    {
+        require dirname(__FILE__).'/Map/ProductMap.php';
+
+        $item = new Product;
+
+        $item->setData([
+            'name' => 'Producto',
+            'price' => 12.34,
+            'image' => 'some/url.jpg'
+        ]);
+
+        $trigger = new Trigger;
+        
+        $trigger->push([$item], $mapConfig);
+        $this->assertEquals('created', $item->getState());
     }
 }
