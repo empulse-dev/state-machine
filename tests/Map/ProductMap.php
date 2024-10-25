@@ -33,18 +33,19 @@ $mapConfig = [
                         'active'
                     ]
                 ],
-                /*[
+                [
                     Map::VALIDATOR => NotEmptyValidator::class,
                     Map::VALIDATOR_CONFIG => [
                         'name',
                         'price' 
                     ]
-                ]*/
+                ]
             ],
         ],
         'enrich' => [
             Map::MAP_FROM => [
                 'enrich',
+                'disable'
             ],
             Map::MAP_TO => 'publish',
             Map::VALIDATORS => [
@@ -57,7 +58,7 @@ $mapConfig = [
                 [
                     Map::VALIDATOR => NotEmptyValidator::class,
                     Map::VALIDATOR_CONFIG => [
-                        'image' 
+                        'image'
                     ]
                 ]
             ],

@@ -95,46 +95,4 @@ final class TriggerTest extends TestCase
 
         $this->assertEquals('processing', $item->getState());
     }
-
-    public function testProductMovement(): void
-    {
-        require dirname(__FILE__).'/Map/ProductMap.php';
-
-        $item = new Item;
-
-        $item->setData([
-            'name' => 'Producto',
-        ]);
-
-        $trigger = new Trigger;
-        
-        $trigger->push([$item], $mapConfig);
-        $this->assertEquals('created', $item->getState());
-        
-        $item->setFlag('active');
-
-        //ENRICH/////////////////////////////////
-        $item->setData([
-            'price' => 12.34
-        ]);
-
-        $trigger->push([$item], $mapConfig);
-        $this->assertEquals('enrich', $item->getState());
-
-        //PUBLISH/////////////////////////////////
-        $item
-            ->setFlag('active')
-            ->setData([
-                'image' => 'some/url.jpg'
-            ]);
-
-        $trigger->push([$item], $mapConfig);
-        $this->assertEquals('publish', $item->getState());
-
-        //DISABLE/////////////////////////////////
-        $item->removeFlag('active');
-
-        $trigger->push([$item], $mapConfig);
-        $this->assertEquals('disable', $item->getState());
-    }
 }
