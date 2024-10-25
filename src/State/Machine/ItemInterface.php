@@ -32,5 +32,6 @@ interface ItemInterface
      * @param mixed $attr
      * @return mixed
      */
-    public function __get($attr):mixed;
+
+    static public function getBitMap():array;
 }

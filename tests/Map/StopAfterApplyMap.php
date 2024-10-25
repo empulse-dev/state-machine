@@ -1,8 +1,7 @@
 <?php
 
 use Empulse\State\Map;
-use Empulse\Tests\Validator\AlwaysMoveValidator;
-use Empulse\Tests\Validator\StopValidator;
+use Empulse\State\Machine\Validator\ManualMoveValidator;
 
 $mapConfig = [
     Map::MAP_CODE => 'sale-map',
@@ -33,10 +32,25 @@ $mapConfig = [
                 Map::STOP_AFTER_APPLY
             ],
             Map::VALIDATORS => [
-                AlwaysMoveValidator::class,
+                [
+                    Map::VALIDATOR => ManualMoveValidator::class,
+                    Map::VALIDATOR_CONFIG => [
+                        true
+                    ]
+                ],
                 Map::VALID_FIRST => [
-                    StopValidator::class,
-                    AlwaysMoveValidator::class
+                    [
+                        Map::VALIDATOR => ManualMoveValidator::class,
+                        Map::VALIDATOR_CONFIG => [
+                            false
+                        ]
+                    ],
+                    [
+                        Map::VALIDATOR => ManualMoveValidator::class,
+                        Map::VALIDATOR_CONFIG => [
+                            true
+                        ]
+                    ]
                 ]
             ],
         ],
@@ -50,7 +64,12 @@ $mapConfig = [
                 'sortable_by_group' => null,
             ],
             Map::VALIDATORS => [
-                AlwaysMoveValidator::class,
+                [
+                    Map::VALIDATOR => ManualMoveValidator::class,
+                    Map::VALIDATOR_CONFIG => [
+                        true
+                    ]
+                ]
             ],
         ],
         'delivery' => [
@@ -63,7 +82,12 @@ $mapConfig = [
                 'sortable_by_group' => null,
             ],
             Map::VALIDATORS => [
-                AlwaysMoveValidator::class,
+                [
+                    Map::VALIDATOR => ManualMoveValidator::class,
+                    Map::VALIDATOR_CONFIG => [
+                        true
+                    ]
+                ]
             ],
         ],
         'return' => [
@@ -76,9 +100,13 @@ $mapConfig = [
                 'sortable_by_group' => null,
             ],
             Map::VALIDATORS => [
-                AlwaysMoveValidator::class,
+                [
+                    Map::VALIDATOR => ManualMoveValidator::class,
+                    Map::VALIDATOR_CONFIG => [
+                        true
+                    ]
+                ]
             ],
         ]
-
     ]
 ];

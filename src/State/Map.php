@@ -15,6 +15,8 @@ class Map
     const MAP_CODE = 'code';
     const MAP_STATES = 'states';
     const MAP_TRANSITIONS = 'transitions';
+
+    const MAP_VALIDATORS = 'validators';
     const STATUS_INITIAL = 'initial';
     const STATUS_MIDDLE = 'middle';
     const STATUS_FINAL = 'final';
@@ -22,6 +24,10 @@ class Map
     const VALID_ALL = 'all_valids_of_this';
 
     const VALIDATORS = 'validators';
+
+    const VALIDATOR = 'v';
+
+    const VALIDATOR_CONFIG = 'vc';
 
     const PROPERTIES = 'properties';
 

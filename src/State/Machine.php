@@ -119,39 +119,36 @@ class Machine {
     }
 
     protected function _can($transition, $parameters){
+        $result = false;
         if(in_array($this->item->getState(), $transition[Map::MAP_FROM])){
             if (!isset($transition[Map::VALIDATORS]) || empty($transition[Map::VALIDATORS])) {
                 throw new MapException('Every transition needs at least one validator');
             }
 
-            return $this->_evaluateValidators($transition[Map::VALIDATORS], $parameters);
-        } 
+            $result = $this->_evaluateValidators($transition[Map::VALIDATORS], $parameters);
+            // var_dump('from: '.$transition['from'][0]. ' to: '.$transition['to'] . ' res: '.(int)$result);
+        }
         
-        return false;
+        return $result;
+    }
+
+    static function getGroups():array{
+        return [
+            Map::VALID_ALL,
+            Map::VALID_FIRST
+        ];
     }
 
     protected function _evaluateValidators($validators, $parameters, $type = Map::VALID_ALL){
         foreach ($validators as $key => $validator) {
-            $denied = false;
-            $isInt = is_int($key);
-            if($isInt && isset($validator[0])){
-                if($denied = $validator[0] === Map::DENIAL_CHAR){
-                    $validator = str_replace(Map::DENIAL_CHAR,'', $validator);
-                }
-            }
-        
-            /**
-             * @todo replace validator::validate for a service when symfony came up
-             * $this->container->get($validator)->validate($object, $parameters)
-             */
-            $result = $isInt
-                ? call_user_func([$validator, 'validate'], $this->item)
-                : $this->_evaluateValidators($validator, $parameters, $key);
-        
-            if($denied){
-                $result = !$result;
-            }
-        
+            $result = (in_array($key, self::getGroups()))
+                ? $this->_evaluateValidators($validator, $parameters, $key)
+                : $this->_executeValidation(
+                    $validator[Map::VALIDATOR],
+                    $validator[Map::VALIDATOR_CONFIG],
+                    $this->item
+                );
+            // var_dump($validator, $result);
             if (Map::VALID_FIRST === $type && $result) {
                 return true;
             }
@@ -162,6 +159,14 @@ class Machine {
         }
         
         return (Map::VALID_ALL === $type);
+    }
+
+    protected function _executeValidation($validator, $config, $item):bool{
+        return call_user_func(
+                [$validator, 'validate'], 
+                $this->item, 
+                $config
+        );
     }
 
     protected function _apply($transitionTo, $parameters = null): void{
