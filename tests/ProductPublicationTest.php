@@ -19,7 +19,7 @@ class Product implements ItemInterface{
 
 final class ProductPublicationTest extends TestCase
 {
-    public function testFlagAndSetDataOnProductScenario(): void
+    public function testFullTransitionProductScenario(): void
     {
         require dirname(__FILE__).'/Map/ProductMap.php';
 
