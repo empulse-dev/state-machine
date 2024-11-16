@@ -46,7 +46,6 @@ final class ProductPublicationTest extends TestCase
 
         //PUBLISH/////////////////////////////////
         $item
-            ->setFlag('active')
             ->setData([
                 'image' => 'some/url.jpg'
             ]);
