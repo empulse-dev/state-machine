@@ -6,7 +6,9 @@ use Empulse\Exception\Map\LoopDetectedException;
 use Empulse\Exception\MapException;
 use Empulse\State\Machine\Item;
 use Empulse\State\Machine\ItemInterface;
-
+use Empulse\State\Machine\Tracker;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Empulse\StateMachine\Event\TransitionItemEvent;
 class Machine {
 
     /**
@@ -34,12 +36,16 @@ class Machine {
 
     protected $code;
 
+    protected $trackerCollection = [];
+
+    public function __construct(
+        private EventDispatcherInterface $eventDispatcher
+    ) {}
+
     public function getCode(){
-        if(empty($this->code)){
-            return self::class;
-        } else {
-            return $this->code;
-        }
+        return (empty($this->code))
+            ? self::class
+            : $this->code;
     }
 
     public function setCode($code){
@@ -60,7 +66,6 @@ class Machine {
 
         //@todo validate item has interface implemented
         $initialState = $this->item->getState();
-        
 
         if (null === $initialState) {
             $initialState = $this->findInitialState();
@@ -94,9 +99,21 @@ class Machine {
             $transitions = $this->transitions;
             //$parameters = $this->getParametersForCurrentTransition();
             $parameters = [];
+            
+            $transitionItem = new TransitionItemEvent($this->item);
+
             foreach ($transitions as $transitionCode => $transition) {
+                $this->eventDispatcher->dispatch($transitionItem, 'before_transition');
+                $this->eventDispatcher->dispatch($transitionItem, 'before_transition.'.$transitionCode);
                 if ($this->_can($transition, $parameters)) {
                     $this->_apply($transition[Map::MAP_TO], $parameters);
+
+                    if(isset($transition[Map::MAP_FLAGS])){
+                        $this->applyFlags($transition[Map::MAP_FLAGS], $this->item);
+                    }
+
+                    $this->eventDispatcher->dispatch($transitionItem, 'after_transition.'.$transitionCode);
+                    $this->eventDispatcher->dispatch($transitionItem, 'after_transition');
 
                     $continue = true;
 
@@ -132,6 +149,23 @@ class Machine {
         return $result;
     }
 
+    protected function applyFlags($flagsConfig, ItemInterface $item){
+        foreach($flagsConfig as $group => $flags){
+            switch($group){
+                case Map::MAP_FLAGS_ACTIVE:
+                    foreach($flags as $flag){
+                        $item->setFlag($flag);
+                    }
+                    break;
+                case Map::MAP_FLAGS_DISABLE:
+                    foreach($flags as $flag){
+                        $item->removeFlag($flag);
+                    }
+                    break;
+            }
+        }
+    }
+
     static function getGroups():array{
         return [
             Map::VALID_ALL,
@@ -162,23 +196,33 @@ class Machine {
     }
 
     protected function _executeValidation($validator, $config, $item):bool{
-        return call_user_func(
+        $result = call_user_func(
                 [$validator, 'validate'], 
                 $this->item, 
                 $config
         );
+
+        $this->trackerCollection[] = new Tracker($validator, $config, $result);
+
+        return $result;
     }
 
     protected function _apply($transitionTo, $parameters = null): void{
+        $previousState = $this->item->getState();
         $this->item->setState($transitionTo);
-        if(!isset($this->appliedTransitions[$transitionTo])){
-            $this->appliedTransitions[$transitionTo] = 1;
+        $fromTo = $previousState.'-'.$transitionTo;
+        if(!isset($this->appliedTransitions[$fromTo])){
+            $this->appliedTransitions[$fromTo] = 1;
         } else {
-            $this->appliedTransitions[$transitionTo]+= 1;
+            $this->appliedTransitions[$fromTo]+= 1;
             
-            if($this->appliedTransitions[$transitionTo] > 1){
-                throw new LoopDetectedException;
+            if($this->appliedTransitions[$fromTo] > 1){
+                throw new LoopDetectedException('Loop detected in transition: '.$fromTo);
             }    
         }
+    }
+
+    public function getTrackerCollection(){
+        return $this->trackerCollection;
     }
 }

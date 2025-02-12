@@ -34,6 +34,13 @@ class Map
     const STOP_AFTER_APPLY = 'stop_after_apply';
 
     const DENIAL_CHAR = '!';
+
+    const MAP_FLAGS = 'flags';
+
+    const MAP_FLAGS_ACTIVE = 'active';
+
+    const MAP_FLAGS_DISABLE = 'disable';
+
     protected $_map = [];
 
     /**

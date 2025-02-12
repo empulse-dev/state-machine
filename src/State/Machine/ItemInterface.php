@@ -17,15 +17,15 @@ interface ItemInterface
 
     /**
      * Summary of getState
-     * @return mixed
+     * @return int
      */
-    public function getState():mixed;
+    public function getState(): ?string;
 
     /**
      * Summary of setState
      * @return \Empulse\State\Machine\ItemInterface
      */
-    public function setState($state):self;
+    public function setState(?string $state): self;
 
     /**
      * Summary of __get
@@ -34,4 +34,6 @@ interface ItemInterface
      */
 
     static public function getBitMap():array;
-}
+
+    public function getTraceableId():string;
+}   

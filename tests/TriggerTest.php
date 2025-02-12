@@ -5,6 +5,7 @@ use Empulse\Exception\MapException;
 use Empulse\State\Machine\ItemInterface;
 use Empulse\State\Machine\Trigger;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Item implements ItemInterface{
     use \Empulse\State\Machine\Item;
@@ -14,6 +15,10 @@ class Item implements ItemInterface{
             'active',
             'published'
         ];
+    }
+
+    public function getTraceableId():string{
+        return 'test-id';
     }
 }
 
@@ -26,7 +31,7 @@ final class TriggerTest extends TestCase
 
         $poi = new Item;
 
-        $trigger = new Trigger;
+        $trigger = new Trigger();
         $trigger->addNewQueueItem(
             $mapConfig, $poi
         );

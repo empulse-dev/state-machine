@@ -1,10 +1,13 @@
 <?php
 
 namespace Empulse\State\Machine;
+
 use Empulse\Exception\MapException;
 use Empulse\State\Machine;
 use Empulse\State\Machine\Item;
 use Empulse\State\Map;
+use Symfony\Contracts\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\EventDispatcher\EventDispatcher;
 
 class Trigger {
 
@@ -13,7 +16,11 @@ class Trigger {
     protected $items = [];
 
     protected $flux = [];
+
+    protected $executionTrackerCollection = [];
     
+    protected $dispatcher;
+
     /**
      * Create Queue Item
      *
@@ -150,37 +157,6 @@ class Trigger {
     }
 
     /**
-     * Push workflow items
-     *
-     * @param array|callable $items
-     * @param string         $flux
-     *
-     * @return array
-     * @throws \Exception
-     */
-    protected function pushWorkflowItems($items, $fluxCode)
-    {
-        $items = is_callable($items) ? $items() : $items;
-
-        // $pushEvent = new PushEvent($items, $flux, $this);
-        // $this->beforePush($pushEvent);
-
-        $stateMachine = new Machine();
-        
-        foreach ($items as $item) {
-            if (!in_array($item, $this->items, true)) {
-                $this->items[] = $item;
-            }
-
-            $stateMachine
-                ->initialize($item, $this->flux[$fluxCode])
-                ->push();
-        }
-
-        return $items;
-    }
-
-    /**
      * Before push item.
      *
      * @param PushEvent $pushEvent
@@ -198,6 +174,44 @@ class Trigger {
     protected function beforePushItem(PushItemEvent $pushItemEvent)
     {
         $this->dispatcher->dispatch(PushItemEvent::BEFORE_PUSH, $pushItemEvent);
+    }
+    
+    /**
+     * Push workflow items
+     *
+     * @param array|callable $items
+     * @param string         $flux
+     *
+     * @return array
+     * @throws \Exception
+     */
+    protected function pushWorkflowItems($items, $fluxCode)
+    {
+        $items = is_callable($items) ? $items() : $items;
+
+        $stateMachine = new Machine(new EventDispatcher);
+
+        //before push
+        
+        foreach ($items as $item) {
+            if (!in_array($item, $this->items, true)) {
+                $this->items[] = $item;
+            }
+
+            $execution = new Execution($fluxCode, clone $item);
+
+            $stateMachine
+                ->initialize($item, $this->flux[$fluxCode])
+                ->push();
+                
+            $execution->finalize($stateMachine->getTrackerCollection(), clone $item);
+
+            $this->executionTrackerCollection[$execution->getKey()] = $execution;
+        }
+
+        //after push
+
+        return $items;
     }
 
     /**
@@ -260,5 +274,9 @@ class Trigger {
     public function setDryRun($dryRun)
     {
         $this->dryRun = $dryRun;
+    }
+
+    public function getTrackerCollection(){
+        return $this->executionTrackerCollection;
     }
 }

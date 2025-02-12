@@ -4,6 +4,7 @@ use Empulse\Exception\Map\LoopDetectedException;
 use Empulse\Exception\MapException;
 use Empulse\State\Machine\ItemInterface;
 use Empulse\State\Machine\Trigger;
+use Empulse\State\Machine\Validator\FlagOnValidator;
 use PHPUnit\Framework\TestCase;
 
 class Product implements ItemInterface{
@@ -14,6 +15,10 @@ class Product implements ItemInterface{
             'active',
             'published'
         ];
+    }
+
+    public function getTraceableId():string{
+        return $this->get('code');
     }
 }
 
@@ -26,6 +31,7 @@ final class ProductPublicationTest extends TestCase
         $item = new Product;
 
         $item->setData([
+            'code' => 'test-code-'.__METHOD__,
             'name' => 'Producto',
         ]);
 
@@ -73,6 +79,7 @@ final class ProductPublicationTest extends TestCase
         $item = new Product;
 
         $item->setData([
+            'code' => 'test-code-'.__METHOD__,
             'name' => 'Producto',
             'price' => 12.34,
             'image' => 'some/url.jpg'
@@ -92,7 +99,10 @@ final class ProductPublicationTest extends TestCase
 
         $item = new Product;
 
+        $code = 'test-code-'.__METHOD__;
+
         $item->setData([
+            'code' => $code,
             'name' => 'Producto',
             'price' => 12.34,
             'image' => 'some/url.jpg'
@@ -102,5 +112,15 @@ final class ProductPublicationTest extends TestCase
         
         $trigger->push([$item], $mapConfig);
         $this->assertEquals('created', $item->getState());
+
+        // var_dump($trigger->getTrackerCollection());
+
+        $execution = $trigger->getTrackerCollection();
+        $step = array_pop($execution);
+        
+        $firstValidation = $step->getTrackerCollection()[0];
+
+        $this->assertEquals(false, $firstValidation->getResult());
+        $this->assertEquals(FlagOnValidator::class, $firstValidation->getValidator());
     }
 }

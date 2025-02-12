@@ -21,7 +21,7 @@ $mapConfig = [
         ]
     ],
     Map::MAP_TRANSITIONS => [
-        'created' => [
+        'to_enrich' => [
             Map::MAP_FROM => [
                 'created',
             ],
@@ -42,7 +42,7 @@ $mapConfig = [
                 ]
             ],
         ],
-        'enrich' => [
+        'to_publish' => [
             Map::MAP_FROM => [
                 'enrich',
                 'disable'
@@ -63,7 +63,7 @@ $mapConfig = [
                 ]
             ],
         ],
-        'disable' => [
+        'to_disable' => [
             Map::MAP_FROM => [
                 'publish',
             ],

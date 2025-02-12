@@ -9,9 +9,9 @@ namespace Empulse\State\Machine;
 trait Item
 {
 
-    public $state = null;
+    private ?string $state = null;
 
-    public $flags = 0;
+    private int $flags = 0;
 
     protected $_data = [];
 
@@ -37,18 +37,18 @@ trait Item
     /**
      * get current state
      * 
-     * @return mixed
+     * @return ?string
      */
-    public function getState(): mixed{
+    public function getState(): ?string{
         return $this->state;
     }
 
     /**
      * set current state
      * 
-     * @return int|null
+     * @return self
      */
-    public function setState($state): self{
+    public function setState(?string $state): self{
         $this->state = $state;
 
         return $this;
