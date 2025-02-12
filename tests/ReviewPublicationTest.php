@@ -80,5 +80,7 @@ final class ReviewPublicationTest extends TestCase
 
         $trigger->push([$review], $mapConfig);
         $this->assertEquals('hide', $review->getState());
+        $this->assertEquals(true, (bool)$review->getFlag('active'));
+        $this->assertEquals(false, (bool)$review->getFlag('disable'));
     }
 }
