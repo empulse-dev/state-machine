@@ -103,32 +103,52 @@ class Machine {
             $transitionItem = new TransitionItemEvent($this->item);
 
             foreach ($transitions as $transitionCode => $transition) {
+                if(!in_array($this->item->getState(), $transition[Map::MAP_FROM])){
+                    continue; //because makes no sense apply transitions if we are not there
+                }
+                
                 $this->eventDispatcher->dispatch($transitionItem, 'before_transition');
                 $this->eventDispatcher->dispatch($transitionItem, 'before_transition.'.$transitionCode);
-                if ($this->_can($transition, $parameters)) {
-                    $this->_apply($transition[Map::MAP_TO], $parameters);
 
-                    if(isset($transition[Map::MAP_FLAGS])){
-                        $this->applyFlags($transition[Map::MAP_FLAGS], $this->item);
+                $can = $this->_can($transition, $parameters);
+
+                if(!$can){
+                    if(isset($transition[Map::MAP_ELSE])){
+                        $transitionToGo = $transition[Map::MAP_ELSE][Map::MAP_TO];
+                        $flags = $transition[Map::MAP_ELSE][Map::MAP_FLAGS] ?? [];
+                        $transitionCode = $transitionCode.'_else';
+                        $properties = $transition[Map::MAP_ELSE][Map::PROPERTIES] ?? [];
+                    } else {
+                        continue; //because we can't apply this transition
                     }
-
-                    $this->eventDispatcher->dispatch($transitionItem, 'after_transition.'.$transitionCode);
-                    $this->eventDispatcher->dispatch($transitionItem, 'after_transition');
-
-                    $continue = true;
-
-                    if(isset($transition[Map::PROPERTIES])){
-                        if(in_array(Map::STOP_AFTER_APPLY, $transition[Map::PROPERTIES])){
-                            $continue = false;
-                        }    
-                    }
-                    
-                    if ($continue) {
-                        $this->movemovemove();
-                    }
-
-                    break;
+                }else {
+                    $transitionToGo = $transition[Map::MAP_TO];
+                    $flags = $transition[Map::MAP_FLAGS] ?? [];
+                    $properties = $transition[Map::PROPERTIES] ?? [];
                 }
+
+                $this->_apply($transitionToGo, $parameters);
+
+                if(!empty($flags)){
+                    $this->applyFlags($flags, $this->item);
+                }
+
+                $this->eventDispatcher->dispatch($transitionItem, 'after_transition.'.$transitionCode);
+                $this->eventDispatcher->dispatch($transitionItem, 'after_transition');
+
+                $continue = true;
+
+                if(!empty($properties)){
+                    if(in_array(Map::STOP_AFTER_APPLY, $properties)){
+                        $continue = false;
+                    }    
+                }
+                
+                if ($continue) {
+                    $this->movemovemove();
+                }
+
+                break; //because some transition was applied
             }
         }
 
@@ -143,7 +163,6 @@ class Machine {
             }
 
             $result = $this->_evaluateValidators($transition[Map::VALIDATORS], $parameters);
-            // var_dump('from: '.$transition['from'][0]. ' to: '.$transition['to'] . ' res: '.(int)$result);
         }
         
         return $result;

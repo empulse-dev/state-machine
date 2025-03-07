@@ -41,6 +41,8 @@ class Map
 
     const MAP_FLAGS_DISABLE = 'disable';
 
+    const MAP_ELSE = 'else';
+
     protected $_map = [];
 
     /**
