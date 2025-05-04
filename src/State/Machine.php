@@ -100,12 +100,12 @@ class Machine {
             //$parameters = $this->getParametersForCurrentTransition();
             $parameters = [];
             
-            $transitionItem = new TransitionItemEvent($this->item);
-
             foreach ($transitions as $transitionCode => $transition) {
                 if(!in_array($this->item->getState(), $transition[Map::MAP_FROM])){
                     continue; //because makes no sense apply transitions if we are not there
                 }
+            
+                $transitionItem = new TransitionItemEvent($this->item, $transitionCode, $transition);
                 
                 $this->eventDispatcher->dispatch($transitionItem, 'before_transition');
                 $this->eventDispatcher->dispatch($transitionItem, 'before_transition.'.$transitionCode);
